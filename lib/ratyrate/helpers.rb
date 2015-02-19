@@ -8,8 +8,6 @@ module Helpers
                cached_average ? cached_average.avg : 0
              end
 
-    @rating = Rate.find_by_rater_id_and_rateable_id_and_dimension(@user.id, @object.id, dimension)
-
     star = options[:star] || 5
     enable_half = options[:enable_half] || false
     half_show = options[:half_show] || false
