@@ -1,30 +1,36 @@
 module Helpers
   def rating_for(rateable_obj, dimension=nil, options={})
+    starts = if user = options[:user]
+               rating = user.ratings_given.where(rateable: rateable_obj, dimension: dimension).first
+               rating ? rating.stars : 0
+             else
+               cached_average = rateable_obj.average dimension
+               cached_average ? cached_average.avg : 0
+             end
 
-    cached_average = rateable_obj.average dimension
-    avg = cached_average ? cached_average.avg : 0
+    @rating = Rate.find_by_rater_id_and_rateable_id_and_dimension(@user.id, @object.id, dimension)
 
-    star         = options[:star]         || 5
-    enable_half  = options[:enable_half]  || false 
-    half_show    = options[:half_show]    || false 
-    star_path    = options[:star_path]    || "/assets"
-    star_on      = options[:star_on]      || "star-on.png"
-    star_off     = options[:star_off]     || "star-off.png"
-    star_half    = options[:star_half]    || "star-half.png"
-    cancel       = options[:cancel]       || false
+    star = options[:star] || 5
+    enable_half = options[:enable_half] || false
+    half_show = options[:half_show] || false
+    star_path = options[:star_path] || "/assets"
+    star_on = options[:star_on] || "star-on.png"
+    star_off = options[:star_off] || "star-off.png"
+    star_half = options[:star_half] || "star-half.png"
+    cancel = options[:cancel] || false
     cancel_place = options[:cancel_place] || "left"
-    cancel_hint  = options[:cancel_hint]  || "Cancel current rating!"
-    cancel_on    = options[:cancel_on]    || "cancel-on.png"
-    cancel_off   = options[:cancel_off]   || "cancel-off.png"
-    noRatedMsg   = options[:noRatedMsg]   || "I'am readOnly and I haven't rated yet!"
-    # round        = options[:round]        || { down: .26, full: .6, up: .76 }
-    space        = options[:space]        || false 
-    single       = options[:single]       || false
-    target       = options[:target]       || ''
-    targetText   = options[:targetText]   || ''
-    targetType   = options[:targetType]   || 'hint'
-    targetFormat = options[:targetFormat] || '{score}'
-    targetScore  = options[:targetScore]  || ''
+    cancel_hint = options[:cancel_hint] || "Cancel current rating!"
+    cancel_on = options[:cancel_on] || "cancel-on.png"
+    cancel_off = options[:cancel_off] || "cancel-off.png"
+    no_rated_message = options[:no_rated_message] || "I'am readOnly and I haven't rated yet!"
+    space = options[:space] || false
+    single = options[:single] || false
+    target = options[:target] || ''
+    target_text = options[:target_text] || ''
+    target_type = options[:target_type] || 'hint'
+    target_format = options[:target_format] || '{score}'
+    target_score = options[:target_score] || ''
+    hints = options[:hints] || ['bad', 'poor', 'regular', 'good', 'gorgeous']
 
     disable_after_rate = options[:disable_after_rate] && true
     disable_after_rate = true if disable_after_rate == nil
@@ -35,108 +41,48 @@ module Helpers
       readonly = !current_user || false
     end
 
-    if options[:imdb_avg] && readonly
-      content_tag :div, '', :style => "background-image:url(/assets/mid-star.png);width:61px;height:57px;margin-top:10px;" do
-          content_tag :p, avg, :style => "position:relative;font-size:.8rem;text-align:center;line-height:60px;"
-      end
-    else
-      content_tag :div, '', "data-dimension" => dimension, :class => "star", "data-rating" => avg,
-                  "data-id" => rateable_obj.id, "data-classname" => rateable_obj.class.name,
-                  "data-disable-after-rate" => disable_after_rate,
-                  "data-readonly" => readonly,
-                  "data-enable-half" => enable_half,
-                  "data-half-show" => half_show,
-                  "data-star-count" => star, 
-                  "data-star-path" => star_path,
-                  "data-star-on" => star_on,
-                  "data-star-off" => star_off,
-                  "data-star-half" => star_half,
-                  "data-cancel" => cancel,
-                  "data-cancel-place" => cancel_place,
-                  "data-cancel-hint"  => cancel_hint,
-                  "data-cancel-on" => cancel_on,
-                  "data-cancel-off" => cancel_off,
-                  "data-no-rated-message" => noRatedMsg,
-                  # "data-round" => round,
-                  "data-space" => space,
-                  "data-single" => single,
-                  "data-target" => target,
-                  "data-target-text" => targetText,
-                  "data-target-type" => targetType,
-                  "data-target-format" => targetFormat,
-                  "data-target-score" => targetScore
-    end
+    content_tag :div, '', class: 'star', data: {
+        dimension: dimension,
+        rating: starts,
+        id: rateable_obj.id,
+        classname: rateable_obj.class.name,
+        disable_after_rate: disable_after_rate,
+        readonly: readonly,
+        enable_half: enable_half,
+        half_show: half_show,
+        star_count: star,
+        path: star_path,
+        star_on: star_on,
+        star_off: star_off,
+        star_half: star_half,
+        cancel: cancel,
+        cancel_place: cancel_place,
+        cancel_hint: cancel_hint,
+        cancel_on: cancel_on,
+        cancel_off: cancel_off,
+        no_rated_message: no_rated_message,
+        hints: hints,
+        space: space,
+        single: single,
+        target: target,
+        target_text: target_text,
+        target_type: target_type,
+        target_format: target_format,
+        target_score: target_score
+    }
   end
 
   def imdb_style_rating_for(rateable_obj, user, options = {})
     overall_avg = rateable_obj.overall_avg(user)
 
     content_tag :div, '', :style => "background-image:url(/assets/big-star.png);width:81px;height:81px;margin-top:10px;" do
-        content_tag :p, overall_avg, :style => "position:relative;line-height:85px;text-align:center;"
+      content_tag :p, overall_avg, :style => "position:relative;line-height:85px;text-align:center;"
     end
   end
 
   def rating_for_user(rateable_obj, rating_user, dimension = nil, options = {})
-    @object = rateable_obj
-    @user = rating_user
-	  @rating = Rate.find_by_rater_id_and_rateable_id_and_dimension(@user.id, @object.id, dimension)
-	  stars = @rating ? @rating.stars : 0
-
-    star         = options[:star]         || 5
-    enable_half  = options[:enable_half]  || false 
-    half_show    = options[:half_show]    || false
-    star_path    = options[:star_path]    || "/assets"
-    star_on      = options[:star_on]      || "star-on.png"
-    star_off     = options[:star_off]     || "star-off.png"
-    star_half    = options[:star_half]    || "star-half.png"
-    cancel       = options[:cancel]       || false
-    cancel_place = options[:cancel_place] || "left"
-    cancel_hint  = options[:cancel_hint]  || "Cancel current rating!"
-    cancel_on    = options[:cancel_on]    || "cancel-on.png"
-    cancel_off   = options[:cancel_off]   || "cancel-off.png"
-    noRatedMsg   = options[:noRatedMsg]   || "I'am readOnly and I haven't rated yet!"
-    # round        = options[:round]        || { down: .26, full: .6, up: .76 }
-    space        = options[:space]        || false 
-    single       = options[:single]       || false
-    target       = options[:target]       || ''
-    targetText   = options[:targetText]   || ''
-    targetType   = options[:targetType]   || 'hint'
-    targetFormat = options[:targetFormat] || '{score}'
-    targetScore  = options[:targetScore]  || ''
-
-    disable_after_rate = options[:disable_after_rate] || false
-
-    readonly=false
-    if disable_after_rate
-      readonly = rating_user.present? ? !rateable_obj.can_rate?(rating_user, dimension) : true
-    end
-
-    content_tag :div, '', "data-dimension" => dimension, :class => "star", "data-rating" => stars,
-                "data-id" => rateable_obj.id, "data-classname" => rateable_obj.class.name,
-                "data-disable-after-rate" => disable_after_rate,
-                "data-readonly" => readonly,
-                "data-enable-half" => enable_half,
-                "data-half-show" => half_show,
-                "data-star-count" => star, 
-                "data-star-path" => star_path,
-                "data-star-on" => star_on,
-                "data-star-off" => star_off,
-                "data-star-half" => star_half,
-                "data-cancel" => cancel,
-                "data-cancel-place" => cancel_place,
-                "data-cancel-hint"  => cancel_hint,
-                "data-cancel-on" => cancel_on,
-                "data-cancel-off" => cancel_off,
-                "data-no-rated-message" => noRatedMsg,
-                # "data-round" => round,
-                "data-space" => space,
-                "data-single" => single,
-                "data-target" => target,
-                "data-target-text" => targetText,
-                "data-target-format" => targetFormat,
-                "data-target-score" => targetScore
+    rating_for rateable_obj, dimension, options.merge(user: rating_user)
   end
-
 end
 
 class ActionView::Base
