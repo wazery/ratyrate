@@ -34,23 +34,10 @@ class RatyrateGenerator < ActiveRecord::Generators::Base
     route "post '/rate' => 'rater#create', :as => 'rate'"
   end
 
-  desc "cacheable rating average migration is creating ..."
-  def create_cacheable_migration
-    migration_template "cache_migration.rb", "db/migrate/create_rating_caches.rb"
-  end
-
-  desc "migration is creating ..."
-  def create_ratyrate_migration
+  desc "copy migrations"
+  def create_migrations
     migration_template "migration.rb", "db/migrate/create_rates.rb"
-  end
-
-  desc "average caches migration is creating ..."
-  def create_average_caches_migration
     migration_template "average_cache_migration.rb", "db/migrate/create_average_caches.rb"
-  end
-
-  desc "overall averages migration is creating ..."
-  def create_overall_averages_migration
     migration_template "overall_average_migration.rb", "db/migrate/create_overall_averages.rb"
   end
 end
