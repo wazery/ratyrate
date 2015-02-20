@@ -4,46 +4,37 @@ module Ratyrate
 
   def rate(stars, user, dimension=nil, dirichlet_method=false)
     dimension = nil if dimension.blank?
+    binding.pry
 
     if can_rate? user, dimension
       rates(dimension).create! do |r|
         r.stars = stars
         r.rater = user
       end
-      if dirichlet_method
-        update_rate_average_dirichlet(stars, dimension)
-      else
-        update_rate_average(stars, dimension)
-      end
+      update_rate_average(stars, dimension)
     else
       update_current_rate(stars, user, dimension)
     end
 
-    update_average_rating(stars, user, dimension)
+    update_overall_average_rating(stars, user, dimension)
   end
 
-  def update_average_rating(stars, user, dimension)
-
-  end
-
-  def update_rate_average_dirichlet(stars, dimension=nil)
-    ## assumes 5 possible vote categories
-    dp = {1 => 1, 2 => 1, 3 => 1, 4 => 1, 5 => 1}
-    stars_group = Hash[rates(dimension).group(:stars).count.map{|k,v| [k.to_i,v] }]
-    posterior = dp.merge(stars_group){|key, a, b| a + b}
-    sum = posterior.map{ |i, v| v }.inject { |a, b| a + b }
-    davg = posterior.map{ |i, v| i * v }.inject { |a, b| a + b }.to_f / sum
-
-    if average(dimension).nil?
-      send("create_#{average_assoc_name(dimension)}!", { avg: davg, qty: 1, dimension: dimension })
+  def overall_average(user=nil)
+    if user
+      average_rates_for_user(user)
     else
-      a = average(dimension)
-      a.qty = rates(dimension).count
-      a.avg = davg
-      a.save!(validate: false)
+      average_rates
     end
   end
-  
+
+  def update_overall_average_rating(stars, user, dimension)
+     user_average     = overall_average_for_user(user).first_or_build
+     user_average.avg = user.ratings_given.where(rateable: self).average(:stars)
+     user_average.save validate: false
+     binding.pry
+     overall     = overall_average.first_or_build
+  end
+
   def update_rate_average(stars, dimension=nil)
     if average(dimension).nil?
       send("create_#{average_assoc_name(dimension)}!", { avg: stars, qty: 1, dimension: dimension })
@@ -69,29 +60,6 @@ module Ratyrate
     end
   end
 
-  def overall_avg(user)
-    # avg = OverallAverage.where(rateable_id: self.id)
-    # #FIXME: Fix the bug when the movie has no ratings
-    # unless avg.empty?
-    #   return avg.take.avg unless avg.take.avg == 0
-    # else # calculate average, and save it
-    #   dimensions_count = overall_score = 0
-    #   user.ratings_given.select('DISTINCT dimension').each do |d|
-    #     dimensions_count = dimensions_count + 1
-    #     unless average(d.dimension).nil?
-    #       overall_score = overall_score + average(d.dimension).avg
-    #     end
-    #   end
-    #   overall_avg = (overall_score / dimensions_count).to_f.round(1)
-    #   AverageCache.create! do |a|
-    #     a.rater_id = user.id
-    #     a.rateable_id = self.id
-    #     a.avg = overall_avg
-    #   end
-    #   overall_avg
-    # end
-  end
-
   def average(dimension=nil)
     send(average_assoc_name(dimension))
   end
@@ -101,7 +69,7 @@ module Ratyrate
   end
 
   def can_rate?(user, dimension=nil)
-    rates.where(rater_id: user.id, dimension: dimension).present?
+    rates.where(rater_id: user.id, dimension: dimension).blank?
   end
 
   def rates(dimension=nil)
@@ -118,13 +86,16 @@ module Ratyrate
     end
 
     def ratyrate_rateable(*dimensions)
-      cattr_accessor :dimensions
-      @@dimensions = dimensions
+      define_method :all_dimensions do
+        dimensions
+      end
 
       has_many :rates_without_dimension, -> { where dimension: nil }, as: :rateable, class_name: "Rate"
       has_many :raters_without_dimension, through: :rates_without_dimension, source: :rater
       has_one :rate_average_without_dimension, -> { where dimension: nil}, as: :cacheable,
               class_name: "RatingCache", dependent: :destroy
+      has_one :average_rates_for_user, -> (user){ where(rater_id: user.id) }, as: :rateable, class_name: 'RatingAverage'
+      has_one :average_rates, -> { where(rater_id: nil) }, as: :rateable, class_name: 'RatingAverage'
 
       dimensions.each do |dimension|
         has_many "#{dimension}_rates".to_sym, -> { where dimension: dimension.to_s },
