@@ -26,7 +26,6 @@ class RatyrateGenerator < ActiveRecord::Generators::Base
     class_collisions 'Rate'
     template 'model.rb', File.join('app/models', "rate.rb")
     template 'cache_model.rb', File.join('app/models', "rating_cache.rb")
-    template 'average_cache_model.rb', File.join('app/models', "average_cache.rb")
     template 'rating_average_model.rb', File.join('app/models', "rating_average.rb")
   end
 
@@ -37,7 +36,7 @@ class RatyrateGenerator < ActiveRecord::Generators::Base
   desc "copy migrations"
   def create_migrations
     migration_template "migration.rb", "db/migrate/create_rates.rb"
-    migration_template "average_cache_migration.rb", "db/migrate/create_average_caches.rb"
+    migration_template "cache_migration.rb", "db/migrate/cache_migration.rb"
     migration_template "rating_average_migration.rb", "db/migrate/create_rating_averages.rb"
   end
 end
