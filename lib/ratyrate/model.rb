@@ -4,7 +4,6 @@ module Ratyrate
 
   def rate(stars, user, dimension=nil, dirichlet_method=false)
     dimension = nil if dimension.blank?
-    binding.pry
 
     if can_rate? user, dimension
       rates(dimension).create! do |r|
@@ -28,16 +27,21 @@ module Ratyrate
   end
 
   def update_overall_average_rating(stars, user, dimension)
-     user_average     = overall_average_for_user(user).first_or_build
-     user_average.avg = user.ratings_given.where(rateable: self).average(:stars)
-     user_average.save validate: false
-     binding.pry
-     overall     = overall_average.first_or_build
+    # We need user average rating for all dimensions as will as overall rating form all users of all dimensions ( which they have rated )
+    user_average = average_rates_for_user(user) || build_average_rates_for_user(rater: user)
+    user_average.avg = user.ratings_given.where(rateable: self).average(:stars)
+    user_average.qty = user.ratings_given.where(rateable: self).count
+    user_average.save validate: false
+
+    overall = average_rates || build_average_rates
+    overall.avg = Rate.where(rateable: self).average(:stars)
+    overall.qty = Rate.where(rateable: self).count
+    overall.save validate: false
   end
 
   def update_rate_average(stars, dimension=nil)
     if average(dimension).nil?
-      send("create_#{average_assoc_name(dimension)}!", { avg: stars, qty: 1, dimension: dimension })
+      send("create_#{average_assoc_name(dimension)}!", {avg: stars, qty: 1, dimension: dimension})
     else
       a = average(dimension)
       a.qty = rates(dimension).count
@@ -47,7 +51,7 @@ module Ratyrate
   end
 
   def update_current_rate(stars, user, dimension)
-    current_rate = rates.where(rater_id: user.id, dimension: dimension).take
+    current_rate = rates(dimension).where(rater_id: user.id).take
     current_rate.stars = stars
     current_rate.save!(validate: false)
 
@@ -69,7 +73,7 @@ module Ratyrate
   end
 
   def can_rate?(user, dimension=nil)
-    rates.where(rater_id: user.id, dimension: dimension).blank?
+    rates(dimension).where(rater_id: user.id).blank?
   end
 
   def rates(dimension=nil)
@@ -92,22 +96,22 @@ module Ratyrate
 
       has_many :rates_without_dimension, -> { where dimension: nil }, as: :rateable, class_name: "Rate"
       has_many :raters_without_dimension, through: :rates_without_dimension, source: :rater
-      has_one :rate_average_without_dimension, -> { where dimension: nil}, as: :cacheable,
+      has_one :rate_average_without_dimension, -> { where dimension: nil }, as: :cacheable,
               class_name: "RatingCache", dependent: :destroy
-      has_one :average_rates_for_user, -> (user){ where(rater_id: user.id) }, as: :rateable, class_name: 'RatingAverage'
+      has_one :average_rates_for_user, -> (user) { where(rater_id: user.id) }, as: :rateable, class_name: 'RatingAverage'
       has_one :average_rates, -> { where(rater_id: nil) }, as: :rateable, class_name: 'RatingAverage'
 
       dimensions.each do |dimension|
         has_many "#{dimension}_rates".to_sym, -> { where dimension: dimension.to_s },
-                                              dependent: :destroy,
-                                              class_name: "Rate",
-                                              as: :rateable
+                 dependent: :destroy,
+                 class_name: "Rate",
+                 as: :rateable
 
         has_many "#{dimension}_raters".to_sym, through: :"#{dimension}_rates", source: :rater
 
         has_one "#{dimension}_average".to_sym, -> { where dimension: dimension.to_s },
-                                              as: :cacheable, class_name: "RatingCache",
-                                              dependent: :destroy
+                as: :cacheable, class_name: "RatingCache",
+                dependent: :destroy
       end
     end
   end
