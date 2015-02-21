@@ -89,12 +89,12 @@ module Ratyrate
       has_many :rates_without_dimension, -> { where dimension: nil }, as: :rateable, class_name: "Rate"
       has_many :raters_without_dimension, through: :rates_without_dimension, source: :rater
       has_many :ratings, as: :rateable, class_name: 'Rate', dependent: :destroy
-      has_many :raters, through: rating, source: :rater
+      has_many :raters, -> { select("DISTINCT(rater_id)") }, through: :ratings, source: :rater
 
       has_one :rate_average_without_dimension, -> { where dimension: nil }, as: :cacheable,
               class_name: "RatingCache", dependent: :destroy
-      has_one :average_rates_for_user, -> (user) { where(rater_id: user.id) }, as: :rateable, class_name: 'RatingAverage'
-      has_one :average_rates, -> { where(rater_id: nil) }, as: :rateable, class_name: 'RatingAverage'
+      has_one :average_rates_for_user, -> (user) { where(rater_id: user.id) }, as: :rateable, class_name: 'RatingAverage', dependent: :destroy
+      has_one :average_rates, -> { where(rater_id: nil) }, as: :rateable, class_name: 'RatingAverage', dependent: :destroy
 
 
       dimensions.each do |dimension|

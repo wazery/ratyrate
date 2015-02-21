@@ -44,6 +44,7 @@ function initstars(){
       click: function(score, evt) {
         var _this = this;
         if (score == null) { score = 0; }
+        $(_this).trigger("rating:beforeUpdating", $(_this).target);
         $.post('<%= Rails.application.class.routes.url_helpers.rate_path %>',
         {
           score: score,
@@ -52,12 +53,14 @@ function initstars(){
           klass: $(this).attr('data-classname')
         },
         function(data) {
-          if(data) {
+          if(data.success) {
             // success code goes here ...
 
             if ($(_this).attr('data-disable-after-rate') == 'true') {
               $(_this).raty('set', { readOnly: true, score: score });
+
             }
+            $(_this).trigger("rating:updated", data);
           }
         });
       }
