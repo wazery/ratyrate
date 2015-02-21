@@ -2,7 +2,7 @@ require 'active_support/concern'
 module Ratyrate
   extend ActiveSupport::Concern
 
-  def rate(stars, user, dimension=nil, dirichlet_method=false)
+  def rate(stars, user, dimension=nil)
     dimension = nil if dimension.blank?
 
     if can_rate? user, dimension
@@ -10,16 +10,16 @@ module Ratyrate
         r.stars = stars
         r.rater = user
       end
-      update_rate_average(stars, dimension)
     else
       update_current_rate(stars, user, dimension)
     end
 
+    update_rate_average(stars, dimension)
     update_overall_average_rating(stars, user, dimension)
   end
 
   def overall_average(user=nil)
-    if user
+    if user.present?
       average_rates_for_user(user)
     else
       average_rates
@@ -33,7 +33,7 @@ module Ratyrate
     user_average.qty = user.ratings_given.where(rateable: self).count
     user_average.save validate: false
 
-    overall = average_rates || build_average_rates
+    overall     = average_rates || build_average_rates
     overall.avg = Rate.where(rateable: self).average(:stars)
     overall.qty = Rate.where(rateable: self).count
     overall.save validate: false
@@ -41,7 +41,7 @@ module Ratyrate
 
   def update_rate_average(stars, dimension=nil)
     if average(dimension).nil?
-      send("create_#{average_assoc_name(dimension)}!", {avg: stars, qty: 1, dimension: dimension})
+      send("create_#{average_assoc_name(dimension)}!", { avg: stars, qty: 1, dimension: dimension })
     else
       a = average(dimension)
       a.qty = rates(dimension).count
@@ -54,14 +54,6 @@ module Ratyrate
     current_rate = rates(dimension).where(rater_id: user.id).take
     current_rate.stars = stars
     current_rate.save!(validate: false)
-
-    if rates(dimension).count > 1
-      update_rate_average(stars, dimension)
-    else # Set the avarage to the exact number of stars
-      a = average(dimension)
-      a.avg = stars
-      a.save!(validate: false)
-    end
   end
 
   def average(dimension=nil)
@@ -80,26 +72,30 @@ module Ratyrate
     dimension ? self.send("#{dimension}_rates") : rates_without_dimension
   end
 
-  def raters(dimension=nil)
+  def raters_for(dimension=nil)
     dimension ? self.send("#{dimension}_raters") : raters_without_dimension
   end
 
   module ClassMethods
     def ratyrate_rater
-      has_many :ratings_given, :class_name => "Rate", :foreign_key => :rater_id
+      has_many :ratings_given, class_name: "Rate", foreign_key: :rater_id
     end
 
     def ratyrate_rateable(*dimensions)
-      define_method :all_dimensions do
+      define_method :rating_dimensions do
         dimensions
       end
 
       has_many :rates_without_dimension, -> { where dimension: nil }, as: :rateable, class_name: "Rate"
       has_many :raters_without_dimension, through: :rates_without_dimension, source: :rater
+      has_many :ratings, as: :rateable, class_name: 'Rate', dependent: :destroy
+      has_many :raters, through: rating, source: :rater
+
       has_one :rate_average_without_dimension, -> { where dimension: nil }, as: :cacheable,
               class_name: "RatingCache", dependent: :destroy
       has_one :average_rates_for_user, -> (user) { where(rater_id: user.id) }, as: :rateable, class_name: 'RatingAverage'
       has_one :average_rates, -> { where(rater_id: nil) }, as: :rateable, class_name: 'RatingAverage'
+
 
       dimensions.each do |dimension|
         has_many "#{dimension}_rates".to_sym, -> { where dimension: dimension.to_s },
@@ -115,7 +111,6 @@ module Ratyrate
       end
     end
   end
-
 end
 
 class ActiveRecord::Base

@@ -70,12 +70,16 @@ module Helpers
     }
   end
 
-  def imdb_style_rating_for(rateable_obj, user, options = {})
-    overall_avg = rateable_obj.overall_avg(user)
+  def average_rating_for(rateable_obj, options = {})
+    overall_avg = rateable_obj.overall_average options[:user]
 
     content_tag :div, '', :style => "background-image:url(/assets/big-star.png);width:81px;height:81px;margin-top:10px;" do
       content_tag :p, overall_avg, :style => "position:relative;line-height:85px;text-align:center;"
     end
+  end
+
+  def average_rating_for_user(rateable_obj, user, options = {})
+    average_rating_for(rateable_obj, options.merge(user: user))
   end
 
   def rating_for_user(rateable_obj, rating_user, dimension = nil, options = {})
