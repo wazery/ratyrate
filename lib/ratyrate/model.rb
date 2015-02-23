@@ -26,9 +26,15 @@ module Ratyrate
     end
   end
 
+  def average_rates_for_user(user)
+    if average_rates_with_user.present?
+      average_rates_with_user.find_by_rater_id(user.id)
+    end
+  end
+
   def update_overall_average_rating(stars, user, dimension)
     # We need user average rating for all dimensions as will as overall rating form all users of all dimensions ( which they have rated )
-    user_average = average_rates_for_user(user) || build_average_rates_for_user(rater: user)
+    user_average = average_rates_for_user(user) || build_average_rates_with_user(rater: user)
     user_average.avg = user.ratings_given.where(rateable: self).average(:stars)
     user_average.qty = user.ratings_given.where(rateable: self).count
     user_average.save validate: false
@@ -93,7 +99,7 @@ module Ratyrate
 
       has_one :rate_average_without_dimension, -> { where dimension: nil }, as: :cacheable,
               class_name: "RatingCache", dependent: :destroy
-      has_one :average_rates_for_user, -> (user) { where(rater_id: user.id) }, as: :rateable, class_name: 'RatingAverage', dependent: :destroy
+      has_one :average_rates_with_user, -> { where("rater_id IS NOT NULL") }, as: :rateable, class_name: 'RatingAverage', dependent: :destroy
       has_one :average_rates, -> { where(rater_id: nil) }, as: :rateable, class_name: 'RatingAverage', dependent: :destroy
 
 
