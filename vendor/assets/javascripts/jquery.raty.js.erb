@@ -328,7 +328,7 @@
 					icon = this.opt.starOff;
 				}
 
-				this.stars.eq(Math.ceil(score) - 1).attr('src', methods.starPath(self.opt.path, icon));
+				this.stars.eq(Math.ceil(score) - 1).attr('src', methods.starPath(this.opt.path, icon));
 			}															// Full down: [x.00 .. x.25]
 		}, score: function() {
 			return arguments.length ? methods.setScore.apply(this, arguments) : methods.getScore.call(this);
@@ -395,7 +395,7 @@
 			var diff = (score - Math.floor(score)).toFixed(1);
 
 			if (diff > 0 && diff < .6) {
-				this.stars.eq(Math.ceil(score) - 1).attr('src', methods.starPath(self.opt.path, this.opt.starHalf));
+				this.stars.eq(Math.ceil(score) - 1).attr('src', methods.starPath(this.opt.path, this.opt.starHalf));
 			}
 		}, initialize: function(score) {
 			score = !score ? 0 : methods.between(score, 0, this.opt.number);
