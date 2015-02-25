@@ -32,12 +32,14 @@ module Helpers
 
     disable_after_rate = options[:disable_after_rate] && true
     disable_after_rate = true if disable_after_rate == nil
-
-    if disable_after_rate
-      readonly = !(current_user && rateable_obj.can_rate?(current_user, dimension))
-    else
-      readonly = !current_user || false
-    end
+    
+    read_only = if options.has_key?(:read_only)
+                  options[:read_only] == true
+                elsif disable_after_rate
+                  !(current_user && rateable_obj.can_rate?(current_user, dimension))
+                else
+                  false
+                end
 
     content_tag :div, '', class: 'star', data: {
         dimension: dimension,
