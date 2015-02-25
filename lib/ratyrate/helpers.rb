@@ -38,6 +38,9 @@ module Helpers
     else
       readonly = !current_user || false
     end
+    
+    #ReadOnly
+    readonly = options[:readonly] if options[:readonly].present?
 
     content_tag :div, '', class: 'star', data: {
         dimension: dimension,
