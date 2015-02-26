@@ -33,7 +33,7 @@ module Helpers
     disable_after_rate = options[:disable_after_rate] && true
     disable_after_rate = true if disable_after_rate == nil
     
-    read_only = if options.has_key?(:read_only)
+    readonly = if options.has_key?(:read_only)
                   options[:read_only] == true
                 elsif disable_after_rate
                   !(current_user && rateable_obj.can_rate?(current_user, dimension))
