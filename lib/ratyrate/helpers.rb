@@ -27,15 +27,15 @@ module Helpers
     disable_after_rate = true if disable_after_rate == nil
 
     readonly = if options.has_key?(:read_only)
-                  options[:read_only] == true
-                elsif disable_after_rate
-                  !(current_user && rateable_obj.can_rate?(current_user, dimension))
-                else
-                  false
-                end
+                 options[:read_only] == true
+               elsif disable_after_rate
+                 !(current_user && rateable_obj.can_rate?(current_user, dimension))
+               else
+                 false
+               end
 
     starts = if options[:stars]
-                options[:stars].to_s
+               options[:stars].to_s
              elsif user  = options[:user]
                rating = user.ratings_given.where(rateable: rateable_obj, dimension: dimension).first
                rating ? rating.stars.to_s : 0
@@ -45,34 +45,34 @@ module Helpers
              end
 
     content_tag :div, '', class: 'star', data: {
-        dimension:          dimension,
-        rating:             starts,
-        id:                 rateable_obj.id,
-        classname:          rateable_obj.class.name,
-        disable_after_rate: disable_after_rate,
-        readonly:           readonly,
-        enable_half:        enable_half,
-        half_show:          half_show,
-        star_count:         star,
-        path:               star_path,
-        star_on:            star_on,
-        star_off:           star_off,
-        star_half:          star_half,
-        cancel:             cancel,
-        cancel_place:       cancel_place,
-        cancel_hint:        cancel_hint,
-        cancel_on:          cancel_on,
-        cancel_off:         cancel_off,
-        no_rated_message:   no_rated_message,
-        hints:              hints,
-        space:              space,
-        single:             single,
-        target:             target,
-        target_text:        target_text,
-        target_type:        target_type,
-        target_format:      target_format,
-        target_score:       target_score
-    }
+                        dimension:          dimension,
+                        rating:             starts,
+                        id:                 rateable_obj.id,
+                        classname:          rateable_obj.class.name,
+                        disable_after_rate: disable_after_rate,
+                        readonly:           readonly,
+                        enable_half:        enable_half,
+                        half_show:          half_show,
+                        star_count:         star,
+                        path:               star_path,
+                        star_on:            star_on,
+                        star_off:           star_off,
+                        star_half:          star_half,
+                        cancel:             cancel,
+                        cancel_place:       cancel_place,
+                        cancel_hint:        cancel_hint,
+                        cancel_on:          cancel_on,
+                        cancel_off:         cancel_off,
+                        no_rated_message:   no_rated_message,
+                        hints:              hints,
+                        space:              space,
+                        single:             single,
+                        target:             target,
+                        target_text:        target_text,
+                        target_type:        target_type,
+                        target_format:      target_format,
+                        target_score:       target_score
+                    }
   end
 
   def average_rating_for(rateable_obj, options = {})
