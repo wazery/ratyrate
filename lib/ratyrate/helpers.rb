@@ -43,6 +43,7 @@ module Helpers
                cached_average = rateable_obj.average dimension
                cached_average ? cached_average.avg.to_s : 0
              end
+    
 
     content_tag :div, '', class: 'star', data: {
                         dimension:          dimension,
