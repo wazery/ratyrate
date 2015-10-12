@@ -7,15 +7,15 @@ class RatyrateGenerator < ActiveRecord::Generators::Base
 
   desc "copying jquery.raty files to assets directory ..."
   def copying
-    copy_file 'jquery.raty.js.erb', 'app/assets/javascripts/jquery.raty.js'
-    copy_file 'star-on.png', 'app/assets/images/star-on.png'
-    copy_file 'star-off.png', 'app/assets/images/star-off.png'
-    copy_file 'star-half.png', 'app/assets/images/star-half.png'
-    copy_file 'mid-star.png', 'app/assets/images/mid-star.png'
-    copy_file 'big-star.png', 'app/assets/images/big-star.png'
-    copy_file 'cancel-on.png', 'app/assets/images/cancel-on.png'
-    copy_file 'cancel-off.png', 'app/assets/images/cancel-off.png'
-    copy_file 'ratyrate.js.erb', 'app/assets/javascripts/ratyrate.js.erb'
+    copy_file 'jquery.raty.js.erb', 'app/assets/javascripts/application/jquery.raty.js'
+    copy_file 'star-on.png', 'app/assets/images/stars/raty/star-on.png'
+    copy_file 'star-off.png', 'app/assets/images/stars/raty/star-off.png'
+    copy_file 'star-half.png', 'app/assets/images/stars/raty/star-half.png'
+    copy_file 'mid-star.png', 'app/assets/images/stars/raty/mid-star.png'
+    copy_file 'big-star.png', 'app/assets/images/stars/raty/big-star.png'
+    copy_file 'cancel-on.png', 'app/assets/images/stars/raty/cancel-on.png'
+    copy_file 'cancel-off.png', 'app/assets/images/stars/raty/cancel-off.png'
+    copy_file 'ratyrate.js.erb', 'app/assets/javascripts/application/ratyrate.js.erb'
     copy_file 'rater_controller.rb', 'app/controllers/rater_controller.rb'
   end
 

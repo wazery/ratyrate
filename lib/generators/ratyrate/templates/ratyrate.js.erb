@@ -1,7 +1,39 @@
-$.fn.raty.defaults.half = false;
-$.fn.raty.defaults.halfShow = true;
-$.fn.raty.defaults.path = "/assets";
-$.fn.raty.defaults.cancel = false;
+$.fn.raty.defaults = {
+  cancel       : false,
+  cancelClass  : 'raty-cancel',
+  cancelHint   : 'Cancel this rating!',
+  cancelOff    : '<%= asset_path('cancel-off.png') %>',
+  cancelOn     : '<%= asset_path('cancel-on.png') %>',
+  cancelPlace  : 'left',
+  click        : undefined,
+  half         : false,
+  halfShow     : true,
+  hints        : ['bad', 'poor', 'regular', 'good', 'gorgeous'],
+  iconRange    : undefined,
+  mouseout     : undefined,
+  mouseover    : undefined,
+  noRatedMsg   : 'Not rated yet!',
+  number       : 5,
+  numberMax    : 20,
+  path         : "/assets",
+  precision    : false,
+  readOnly     : false,
+  round        : { down: 0.25, full: 0.6, up: 0.76 },
+  score        : undefined,
+  scoreName    : 'score',
+  single       : false,
+  space        : true,
+  starHalf     : '<%= asset_path('star-half.png') %>',
+  starOff      : '<%= asset_path('star-off.png') %>',
+  starOn       : '<%= asset_path('star-on.png') %>',
+  starType     : 'img',
+  target       : undefined,
+  targetFormat : '{score}',
+  targetKeep   : false,
+  targetScore  : undefined,
+  targetText   : '',
+  targetType   : 'hint'
+};
 
 function initstars(){
   $(".star").each(function() {
