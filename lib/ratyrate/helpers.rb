@@ -1,6 +1,5 @@
 module Helpers
   def rating_for(rateable_obj, dimension=nil, options={})
-
     cached_average = rateable_obj.average dimension
     avg = cached_average ? cached_average.avg : 0
 
@@ -26,6 +25,7 @@ module Helpers
     targetFormat = options[:targetFormat] || '{score}'
     targetScore  = options[:targetScore]  || ''
     readOnly     = options[:readonly]     || false
+    num_of_voters = options[:num_of_voters] || false
 
     disable_after_rate = options[:disable_after_rate] && true
     disable_after_rate = true if disable_after_rate == nil
@@ -36,6 +36,10 @@ module Helpers
       else
         readOnly = !current_user || false
       end
+    end
+
+    if num_of_voters
+      num_of_voters = Rate.where(:rateable_id => rateable_obj.id).count
     end
 
     if options[:imdb_avg] && readOnly
@@ -67,7 +71,9 @@ module Helpers
                   "data-target-text" => targetText,
                   "data-target-type" => targetType,
                   "data-target-format" => targetFormat,
-                  "data-target-score" => targetScore
+                  "data-target-score" => targetScore,
+                  "data-number-of-voters" => num_of_voters
+                  
     end
   end
 
@@ -108,11 +114,16 @@ module Helpers
     targetFormat = options[:targetFormat] || '{score}'
     targetScore  = options[:targetScore]  || ''
     readOnly     = options[:readonly]     || false
+    num_of_voters = options[:num_of_voters] || false
 
     disable_after_rate = options[:disable_after_rate] || false
 
     if disable_after_rate
       readOnly = rating_user.present? ? !rateable_obj.can_rate?(rating_user, dimension) : true
+    end
+
+    if num_of_voters
+      num_of_voters = Rate.where(:rateable_id => rateable_obj.id).count
     end
 
     content_tag :div, '', "data-dimension" => dimension, :class => "star", "data-rating" => stars,
@@ -138,7 +149,8 @@ module Helpers
                 "data-target" => target,
                 "data-target-text" => targetText,
                 "data-target-format" => targetFormat,
-                "data-target-score" => targetScore
+                "data-target-score" => targetScore,
+                "data-number-of-voters" => num_of_voters
   end
 
 end
