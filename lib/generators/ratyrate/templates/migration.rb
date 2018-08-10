@@ -1,4 +1,4 @@
-class CreateRates < ActiveRecord::Migration
+class CreateRates < ActiveRecord::Migration[5.2]
 
   def self.up
       create_table :rates do |t|
@@ -15,6 +15,8 @@ class CreateRates < ActiveRecord::Migration
 
     def self.down
       drop_table :rates
+      remove_index :rates, :rater_id
+      remove_index :rates, [:rateable_id, :rateable_type]
     end
 
 end
