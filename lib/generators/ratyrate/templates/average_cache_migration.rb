@@ -1,4 +1,4 @@
-class CreateAverageCaches < ActiveRecord::Migration
+class CreateAverageCaches < ActiveRecord::Migration[5.2]
 
   def self.up
     create_table :average_caches do |t|
@@ -13,6 +13,7 @@ class CreateAverageCaches < ActiveRecord::Migration
 
   def self.down
     drop_table :average_caches
+    remove_index :rating_caches, [:cacheable_id, :cacheable_type]
   end
 
 end

@@ -64,26 +64,27 @@ module Ratyrate
   end
 
   def overall_avg(user)
-    # avg = OverallAverage.where(rateable_id: self.id)
-    # #FIXME: Fix the bug when the movie has no ratings
-    # unless avg.empty?
-    #   return avg.take.avg unless avg.take.avg == 0
-    # else # calculate average, and save it
-    #   dimensions_count = overall_score = 0
-    #   user.ratings_given.select('DISTINCT dimension').each do |d|
-    #     dimensions_count = dimensions_count + 1
-    #     unless average(d.dimension).nil?
-    #       overall_score = overall_score + average(d.dimension).avg
-    #     end
-    #   end
-    #   overall_avg = (overall_score / dimensions_count).to_f.round(1)
-    #   AverageCache.create! do |a|
-    #     a.rater_id = user.id
-    #     a.rateable_id = self.id
-    #     a.avg = overall_avg
-    #   end
-    #   overall_avg
-    # end
+    avg = OverallAverage.where(rateable_id: self.id)
+    #FIXME: Fix the bug when the movie has no ratings
+    unless avg.empty?
+      return avg.take.avg unless avg.take.avg == 0
+    else # calculate average, and save it
+      dimensions_count = overall_score = 0
+      user.ratings_given.select('DISTINCT dimension').each do |d|
+        dimensions_count = dimensions_count + 1
+        unless average(d.dimension).nil?
+          overall_score = overall_score + average(d.dimension).avg
+        end
+      end
+      overall_avg = (overall_score / dimensions_count).to_f.round(1)
+      AverageCache.create! do |a|
+        a.rater_id = user.id
+        a.rateable_id = self.id
+        a.rateable_type = self.class.to_s
+        a.avg = overall_avg
+      end
+      overall_avg
+    end
   end
 
   # calculates the movie overall average rating for all users
