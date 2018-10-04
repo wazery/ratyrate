@@ -1,4 +1,4 @@
-class CreateRates < ActiveRecord::Migration
+class CreateRates < ActiveRecord::Migration<%= migration_version %>
 
   def self.up
       create_table :rates do |t|
@@ -9,7 +9,7 @@ class CreateRates < ActiveRecord::Migration
         t.timestamps
       end
 
-      add_index :rates, :rater_id
+      # add_index :rates, :rater_id
       add_index :rates, [:rateable_id, :rateable_type]
     end
 

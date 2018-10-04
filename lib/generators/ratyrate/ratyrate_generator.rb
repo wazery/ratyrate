@@ -36,21 +36,34 @@ class RatyrateGenerator < ActiveRecord::Generators::Base
 
   desc "cacheable rating average migration is creating ..."
   def create_cacheable_migration
-    migration_template "cache_migration.rb", "db/migrate/create_rating_caches.rb"
+    migration_template "cache_migration.rb", "db/migrate/create_rating_caches.rb", migration_version: migration_version
   end
 
   desc "migration is creating ..."
   def create_ratyrate_migration
-    migration_template "migration.rb", "db/migrate/create_rates.rb"
+    migration_template "migration.rb", "db/migrate/create_rates.rb", migration_version: migration_version
   end
 
   desc "average caches migration is creating ..."
   def create_average_caches_migration
-    migration_template "average_cache_migration.rb", "db/migrate/create_average_caches.rb"
+    migration_template "average_cache_migration.rb", "db/migrate/create_average_caches.rb", migration_version: migration_version
   end
 
   desc "overall averages migration is creating ..."
   def create_overall_averages_migration
-    migration_template "overall_average_migration.rb", "db/migrate/create_overall_averages.rb"
+    migration_template "overall_average_migration.rb", "db/migrate/create_overall_averages.rb", migration_version: migration_version
   end
+
+  def rails5?
+    Rails.version.start_with? '5'
+  end
+  def migration_version
+    if rails5?
+      "[#{Rails::VERSION::MAJOR}.#{Rails::VERSION::MINOR}]"
+    else
+      "[#{ActiveRecord::VERSION::MAJOR}.#{ActiveRecord::VERSION::MINOR}]"
+      
+    end
+  end
+
 end

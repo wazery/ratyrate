@@ -1,4 +1,4 @@
-class CreateRatingCaches < ActiveRecord::Migration
+class CreateRatingCaches < ActiveRecord::Migration<%= migration_version %>
 
   def self.up
       create_table :rating_caches do |t|
