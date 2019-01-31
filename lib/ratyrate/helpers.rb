@@ -9,14 +9,14 @@ module Ratyrate
       enable_half  = options[:enable_half]  || false
       half_show    = options[:half_show]    || true
       star_path    = options[:star_path]    || ''
-      star_on      = options[:star_on]      || image_path('star-on.png')
-      star_off     = options[:star_off]     || image_path('star-off.png')
-      star_half    = options[:star_half]    || image_path('star-half.png')
+      star_on      = options[:star_on]      || asset_path('star-on.png')
+      star_off     = options[:star_off]     || asset_path('star-off.png')
+      star_half    = options[:star_half]    || asset_path('star-half.png')
       cancel       = options[:cancel]       || false
       cancel_place = options[:cancel_place] || 'left'
       cancel_hint  = options[:cancel_hint]  || 'Cancel current rating!'
-      cancel_on    = options[:cancel_on]    || image_path('cancel-on.png')
-      cancel_off   = options[:cancel_off]   || image_path('cancel-off.png')
+      cancel_on    = options[:cancel_on]    || asset_path('cancel-on.png')
+      cancel_off   = options[:cancel_off]   || asset_path('cancel-off.png')
       noRatedMsg   = options[:noRatedMsg]   || 'I\'am readOnly and I haven\'t rated yet!'
       # round        = options[:round]        || { down: .26, full: .6, up: .76 }
       space        = options[:space]        || false
@@ -40,7 +40,7 @@ module Ratyrate
       end
 
       if options[:imdb_avg] && readOnly
-        content_tag :div, '', :style => "background-image:url('#{image_path('mid-star.png')}');width:61px;height:57px;margin-top:10px;" do
+        content_tag :div, '', :style => "background-image:url('#{asset_path('mid-star.png')}');width:61px;height:57px;margin-top:10px;" do
             content_tag :p, avg, :style => "position:relative;font-size:.8rem;text-align:center;line-height:60px;"
         end
       else
@@ -76,7 +76,7 @@ module Ratyrate
       #TODO: add option to change the star icon
       overall_avg = rateable_obj.overall_avg(user)
 
-      content_tag :div, '', :style => "background-image:url('#{image_path('big-star.png')}');width:81px;height:81px;margin-top:10px;" do
+      content_tag :div, '', :style => "background-image:url('#{asset_path('big-star.png')}');width:81px;height:81px;margin-top:10px;" do
           content_tag :p, overall_avg, :style => "position:relative;line-height:85px;text-align:center;"
       end
     end
@@ -91,14 +91,14 @@ module Ratyrate
       enable_half  = options[:enable_half]  || false
       half_show    = options[:half_show]    || true
       star_path    = options[:star_path]    || ''
-      star_on      = options[:star_on]      || image_path('star-on.png')
-      star_off     = options[:star_off]     || image_path('star-off.png')
-      star_half    = options[:star_half]    || image_path('star-half.png')
+      star_on      = options[:star_on]      || asset_path('star-on.png')
+      star_off     = options[:star_off]     || asset_path('star-off.png')
+      star_half    = options[:star_half]    || asset_path('star-half.png')
       cancel       = options[:cancel]       || false
       cancel_place = options[:cancel_place] || 'left'
       cancel_hint  = options[:cancel_hint]  || 'Cancel current rating!'
-      cancel_on    = options[:cancel_on]    || image_path('cancel-on.png')
-      cancel_off   = options[:cancel_off]   || image_path('cancel-off.png')
+      cancel_on    = options[:cancel_on]    || asset_path('cancel-on.png')
+      cancel_off   = options[:cancel_off]   || asset_path('cancel-off.png')
       noRatedMsg   = options[:noRatedMsg]   || 'I\'am readOnly and I haven\'t rated yet!'
       # round        = options[:round]        || { down: .26, full: .6, up: .76 }
       space        = options[:space]        || false
