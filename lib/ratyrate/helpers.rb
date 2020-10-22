@@ -27,6 +27,7 @@ module Ratyrate
       targetFormat = options[:targetFormat] || '{score}'
       targetScore  = options[:targetScore]  || ''
       readOnly     = options[:readonly]     || false
+      hide_average = options[:hide_average] || false
 
       disable_after_rate = options[:disable_after_rate] && true
       disable_after_rate = true if disable_after_rate == nil
@@ -44,7 +45,7 @@ module Ratyrate
             content_tag :p, avg, :style => "position:relative;font-size:.8rem;text-align:center;line-height:60px;"
         end
       else
-        content_tag :div, '', "data-dimension" => dimension, :class => "star", "data-rating" => avg,
+        content_tag :div, '', "data-dimension" => dimension, :class => "star", "data-rating" => hide_average == true ? 0 : avg,
                     "data-id" => rateable_obj.id, "data-classname" => rateable_obj.class.name == rateable_obj.class.base_class.name ? rateable_obj.class.name : rateable_obj.class.base_class.name,
                     "data-disable-after-rate" => disable_after_rate,
                     "data-readonly" => readOnly,
